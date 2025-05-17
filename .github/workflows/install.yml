@@ -1,10 +1,9 @@
-name: Test Installation
+name: Build and Test Alien::DuckDB
 
 on:
   push:
-    branches: [ "pu" ]
+    branches: [ main, master, pu ]
   pull_request:
-    branches: [ "pu" ]
   workflow_dispatch:
 
 jobs:
@@ -13,37 +12,116 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        perl-version: ['5.20', '5.26', '5.32', '5.40']
-
+    
     runs-on: ${{ matrix.os }}
-    name: Perl ${{ matrix.perl-version }} on ${{ matrix.os }}
-
+    
+    name: Perl 5.40.2 on ${{ matrix.os }}
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: shogo82148/actions-setup-perl@v1
-        with:
-          perl-version: ${{ matrix.perl-version }}
-      - name: Install System Dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential
-
-      - name: Install Configure Dependencies
-        uses: perl-actions/install-with-cpanm@v1.7
-        with:
-          install: Alien::Build
-
-      - name: Install Path::Tiny (it fails on windows)
-        uses: perl-actions/install-with-cpanm@v1.7
-        if: runner.os == 'Windows'
-        with:
-          tests: false
-          install: Path::Tiny
-
-      - name: Build and Test
-        uses: perl-actions/install-with-cpanm@v1.7
-        with:
-          install: .
-          tests: true
-          verbose: true
+    - uses: actions/checkout@v3
+    
+    - name: Set up Perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: '5.40.2'
+    
+    - name: Install dependencies (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        # Install dependencies needed to parse Makefile.PL
+        cpanm --notest ExtUtils::MakeMaker Alien::Build::MM
+        
+        # Install all dependencies from Makefile.PL
+        cpanm --verbose --installdeps .
+        
+        # OS-specific dependencies
+        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          cpanm --notest IPC::Cmd
+        fi
+        
+        # Test dependencies with FFI support (optional)
+        cpanm --notest FFI::Platypus || true
+    
+    - name: Install dependencies (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Install basic dependencies
+        cpanm --notest ExtUtils::MakeMaker
+        cpanm --notest Alien::Build::MM
+        
+        # Install key dependencies explicitly first
+        cpanm --notest Path::Tiny
+        cpanm --notest Sort::Versions
+        cpanm --notest URI
+        cpanm --notest URI::Escape
+        cpanm --notest Alien::cmake3
+        cpanm --notest Win32::Process
+        
+        # Install all dependencies from Makefile.PL
+        cpanm --verbose --installdeps .
+        
+        # Install Test dependencies
+        cpanm --notest Test::More
+        cpanm --notest Test2::V0
+        cpanm --notest Test::Alien
+        
+        # Test dependencies with FFI support (optional)
+        cpanm --notest FFI::Platypus
+    
+    - name: Build Module (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        perl Makefile.PL
+        make
+        
+    - name: Build Module (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Disable PkgConfig completely on Windows
+        $env:ALIEN_BUILD_PKG_CONFIG = "PkgConfig::Dummy"
+        
+        # Build with verbose output for debugging
+        perl Makefile.PL
+        gmake VERBOSE=1
+        
+    - name: Run Tests (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        make test
+        
+    - name: Run Tests (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Disable PkgConfig completely on Windows
+        $env:ALIEN_BUILD_PKG_CONFIG = "PkgConfig::Dummy"
+        
+        gmake test VERBOSE=1
+        
+    - name: Install Module (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        make install
+        
+    - name: Install Module (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        # Disable PkgConfig completely on Windows
+        $env:ALIEN_BUILD_PKG_CONFIG = "PkgConfig::Dummy"
+        
+        gmake install
+        
+    - name: Verify Installation
+      run: |
+        perl -MAlien::DuckDB -e 'print "DuckDB version: ", Alien::DuckDB->version, "\n"'
+        perl -MAlien::DuckDB -e 'print "DuckDB install type: ", Alien::DuckDB->install_type, "\n"'
+        perl -MAlien::DuckDB -e 'print "DuckDB cflags: ", Alien::DuckDB->cflags, "\n"'
+        perl -MAlien::DuckDB -e 'print "DuckDB libs: ", Alien::DuckDB->libs, "\n"'
+        perl -MAlien::DuckDB -e 'print join("\n", "DuckDB dynamic libs:", Alien::DuckDB->dynamic_libs), "\n"'

@@ -26,6 +26,11 @@ Version 0.02
 
  my $ffi = FFI::Platypus->new;
  $ffi->lib(Alien::DuckDB->dynamic_libs);
+ 
+ # Access version and configuration information
+ my $version = Alien::DuckDB->version;
+ my $cflags = Alien::DuckDB->cflags;
+ my $libs = Alien::DuckDB->libs;
 
 =head1 DESCRIPTION
 
@@ -38,6 +43,24 @@ binaries for your platform. It supports Linux (x86_64, aarch64), macOS (Universa
 and Windows (x86_64, arm64).
 
 =head1 METHODS
+
+=head2 version
+
+ my $version = Alien::DuckDB->version;
+
+Returns the version of the installed DuckDB library.
+
+=head2 cflags
+
+ my $cflags = Alien::DuckDB->cflags;
+
+Returns the compiler flags needed to compile against the DuckDB library.
+
+=head2 libs
+
+ my $libs = Alien::DuckDB->libs;
+
+Returns the linker flags needed to link against the DuckDB library.
 
 =head2 dynamic_libs
 

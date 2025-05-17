@@ -16,15 +16,18 @@ WriteMakefile(
             'Alien::Build::MM'    => '0.32',
             'Alien::Build'        => '0.32',
             'ExtUtils::MakeMaker' => '6.52',
+            'Path::Tiny'          => '0.100',
+            'Alien::cmake3'       => '0.08',
         },
         TEST_REQUIRES => {
-            'Test::More'  => '0',
+            'Test::More'  => '0.94',
             'Test2::V0'   => '0',
-            'Test::Alien' => '0',
+            'Test::Alien' => '0.95',
+            'Path::Tiny'  => '0.100',
         },
         PREREQ_PM => {
             'Alien::Base' => '0.038',
-            'Path::Tiny'  => '0.122',
+            'Path::Tiny'  => '0.100',
         },
         META_MERGE => {
             'meta-spec' => { version => 2 },
@@ -50,4 +53,3 @@ sub MY::postamble {
 sub MY::install {
     $abmm->mm_install(@_);
 }
-
