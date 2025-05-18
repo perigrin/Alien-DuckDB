@@ -1,0 +1,42 @@
+name: Upload to CPAN
+
+on:
+  push:
+    tags:
+      - 'v*'  # Run when tag matches v*, e.g. v0.03, v1.0.0
+  workflow_dispatch:  # Allow manual triggering through the GitHub UI
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    name: Build and upload to CPAN
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.40'
+
+      - name: Install dependencies
+        run: |
+          cpanm --notest ExtUtils::MakeMaker
+          cpanm --notest --installdeps .
+      
+      - name: Configure
+        run: perl Makefile.PL
+      
+      - name: Build
+        run: make
+      
+      - name: Test
+        run: make test
+      
+      - name: Create distribution
+        run: make dist
+      
+      - name: Upload to CPAN
+        uses: thibaultduponchelle/action-upload-to-cpan@master
+        with:
+          username: ${{ secrets.PAUSE_USERNAME }}
+          password: ${{ secrets.PAUSE_PASSWORD }}
