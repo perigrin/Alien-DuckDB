@@ -18,13 +18,46 @@ jobs:
         with:
           perl-version: '5.40'
 
-      - name: Install dependencies
+      - name: Install core build tools
         run: |
           cpanm --notest ExtUtils::MakeMaker
-          cpanm --notest --installdeps .
-      
-      - name: Configure
+          cpanm --notest Alien::Build
+          cpanm --notest Alien::Build::MM
+          cpanm --notest Path::Tiny
+          cpanm --notest Sort::Versions
+          cpanm --notest URI
+          cpanm --notest URI::Escape
+          
+      - name: Check alienfile and Makefile.PL
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          echo "Alienfile contents:"
+          cat alienfile
+          echo "Makefile.PL contents:"
+          cat Makefile.PL
+
+      - name: Configure manually
         run: perl Makefile.PL
+      
+      - name: Check for MYMETA files
+        run: |
+          echo "After Makefile.PL, checking for MYMETA files:"
+          ls -la
+          if [ -f "MYMETA.json" ]; then
+            echo "MYMETA.json exists"
+          else
+            echo "MYMETA.json does not exist"
+          fi
+          if [ -f "MYMETA.yml" ]; then
+            echo "MYMETA.yml exists"
+          else
+            echo "MYMETA.yml does not exist"
+          fi
+      
+      - name: Install dependencies
+        run: |
+          cpanm --notest --installdeps .
       
       - name: Build
         run: make
@@ -35,8 +68,21 @@ jobs:
       - name: Create distribution
         run: make dist
       
+      - name: List distribution files
+        run: ls -la *.tar.gz
+      
       - name: Upload to CPAN
         uses: thibaultduponchelle/action-upload-to-cpan@master
         with:
           username: ${{ secrets.PAUSE_USERNAME }}
           password: ${{ secrets.PAUSE_PASSWORD }}
+          
+      - name: Archive build logs on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            ~/.cpanm/work/*/build.log
+            *.log
+          retention-days: 7
