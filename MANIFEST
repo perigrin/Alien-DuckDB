@@ -1,0 +1,11 @@
+Changes
+LICENSE
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+README.md
+alienfile
+lib/Alien/DuckDB.pm
+t/basic.t
+META.yml
+META.json
