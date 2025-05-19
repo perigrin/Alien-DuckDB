@@ -58,7 +58,7 @@ share {
     
     # Determine platform and architecture
     my $os = $^O;
-    my $arch;
+    my $arch = '';  # Initialize with empty string to avoid uninitialized warnings
     my $binary_suffix;
     my $download_url;
     
@@ -81,6 +81,7 @@ share {
     } 
     elsif ($os eq 'darwin') {
         # macOS - use universal binary
+        $arch = 'universal';  # Define the architecture for macOS
         $download_url = "https://github.com/duckdb/duckdb/releases/download/v$duckdb_version/libduckdb-osx-universal.zip";
         $binary_suffix = 'dylib';
     } 
