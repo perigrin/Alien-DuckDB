@@ -18,6 +18,7 @@ WriteMakefile(
             'ExtUtils::MakeMaker' => '6.52',
             'Path::Tiny'          => '0.100',
             'Alien::cmake3'       => '0.08',
+            'Sort::Versions'      => '0',
         },
         TEST_REQUIRES => {
             'Test::More'  => '0.94',
