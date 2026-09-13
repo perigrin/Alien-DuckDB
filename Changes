@@ -1,5 +1,17 @@
 Revision history for Alien-DuckDB
 
+0.04    2026-09-13
+        - Bundled DuckDB is now 1.5.3, up from 1.2.2 (Torsten Raudssus)
+        - Added the LICENSE file MANIFEST had always listed but which was
+          never present in the distribution
+        - The release workflow now verifies that the git tag matches
+          $VERSION before building, so a tag can no longer ship a different
+          version than it names
+        - Fixed the CI matrix: declare Sort::Versions, resolve cpanm through
+          the mirror index rather than cpanmetadb, derive the FFI version
+          assertion from the build rather than a hardcoded literal, test
+          against 5.44, and stop requiring FFI::Platypus on Windows
+
 0.03_01 TRIAL
         - Trial release: exercises the tag-triggered CPAN upload workflow,
           which had never run. Not indexed as a stable release.
