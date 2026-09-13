@@ -56,7 +56,8 @@ SKIP: {
 
             # Test version function
             $ffi->attach('duckdb_library_version' => [] => 'string');
-            like duckdb_library_version(), qr/^v?1\.2\.2/, 'Got correct version via FFI';
+            like duckdb_library_version(), qr/^v?\Q$version\E/,
+                "Got correct version via FFI: $version";
         };
 }
 
