@@ -54,7 +54,7 @@ meta->around_hook(
 # Configure for share (i.e., when building from source or downloading prebuilt binaries)
 share {
     # Current DuckDB version to use
-    my $duckdb_version = '1.2.2';
+    my $duckdb_version = '1.5.3';
     
     # Determine platform and architecture
     my $os = $^O;
