@@ -1,5 +1,21 @@
 Revision history for Alien-DuckDB
 
+0.03_01 TRIAL
+        - Trial release: exercises the tag-triggered CPAN upload workflow,
+          which had never run. Not indexed as a stable release.
+        - Bumped bundled DuckDB to 1.5.3 (Getty)
+        - Fixed CI: declare Sort::Versions, resolve cpanm through the mirror
+          index rather than cpanmetadb, derive the FFI version assertion from
+          the build, test 5.44 instead of the broken 5.40 Windows build, and
+          stop requiring FFI::Platypus on Windows
+        - Release workflow now verifies the tag matches $VERSION, and pins the
+          third-party upload action it hands PAUSE credentials to
+        - Added the LICENSE file MANIFEST has always claimed
+
+0.03    2025-05-30
+        - Released to CPAN without a corresponding git tag; no entry was
+          recorded at the time
+
 0.02    2025-05-18
         - Fixed cross-platform compatibility issues
         - Improved Windows build process
