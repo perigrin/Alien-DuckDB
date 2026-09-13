@@ -22,6 +22,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     name: Perl ${{ matrix.perl-version }} on ${{ matrix.os }}
+
+    env:
+      # Resolve modules from the mirror's own index rather than cpanmetadb.
+      # cpanmetadb can name a distfile that has since been withdrawn from CPAN
+      # (it served Alien-Build-2.87 and FFI-Platypus-2.12 long after both were
+      # gone), which makes every cpanm fetch 404 for reasons unrelated to us.
+      PERL_CPANM_OPT: --mirror-only
     
     steps:
     - uses: actions/checkout@v4
