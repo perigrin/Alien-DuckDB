@@ -41,6 +41,9 @@ jobs:
         # First generate META files by running Makefile.PL
         perl Makefile.PL
         
+        # Install whatever META declares, so this cannot drift from Makefile.PL
+        cpanm --notest --installdeps .
+        
         # Install explicitly known dependencies
         cpanm --notest Alien::Base Path::Tiny Alien::Build Alien::Build::MM
         cpanm --notest Test::More Test2::V0 Test::Alien
@@ -72,6 +75,9 @@ jobs:
         
         # Run Makefile.PL to generate META files
         perl Makefile.PL
+
+        # Install whatever META declares, so this cannot drift from Makefile.PL
+        cpanm --notest --installdeps .
         
         # Install Test dependencies
         cpanm --notest Test::More
