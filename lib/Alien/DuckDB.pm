@@ -5,7 +5,7 @@ use warnings;
 use parent qw( Alien::Base );
 use 5.008004;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03_01';
 
 1;
 
@@ -17,7 +17,7 @@ Alien::DuckDB - Find or build DuckDB
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03_01
 
 =head1 SYNOPSIS
 

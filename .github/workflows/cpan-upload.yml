@@ -10,13 +10,32 @@ jobs:
   build-and-upload:
     runs-on: ubuntu-latest
     name: Build and upload to CPAN
+
+    env:
+      # Resolve modules from the mirror's own index rather than cpanmetadb,
+      # which can name distfiles that have since been withdrawn from CPAN.
+      # Same fix as install.yml; these two workflows must not drift apart.
+      PERL_CPANM_OPT: --mirror-only
+
     steps:
       - uses: actions/checkout@v4
       
       - name: Set up Perl
         uses: shogo82148/actions-setup-perl@v1
         with:
-          perl-version: '5.40'
+          perl-version: '5.44'
+
+      - name: Verify the tag matches $VERSION
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF#refs/tags/v}"
+          ver=$(perl -MExtUtils::MakeMaker -e 'print MM->parse_version(q{lib/Alien/DuckDB.pm})')
+          echo "tag=$tag  \$VERSION=$ver"
+          if [ "$tag" != "$ver" ]; then
+            echo "::error::Tag v$tag does not match \$VERSION $ver in lib/Alien/DuckDB.pm."
+            echo "::error::Nothing reads the tag, so the build would ship $ver regardless."
+            exit 1
+          fi
 
       - name: Install core build tools
         run: |
@@ -72,7 +91,9 @@ jobs:
         run: ls -la *.tar.gz
       
       - name: Upload to CPAN
-        uses: thibaultduponchelle/action-upload-to-cpan@master
+        # Pinned: this action last changed in 2022 and receives PAUSE_PASSWORD,
+        # so it must not float on whatever master happens to be at release time.
+        uses: thibaultduponchelle/action-upload-to-cpan@a026cc0a0de20c07f6517d8499d0b86a46b0fbf1
         with:
           username: ${{ secrets.PAUSE_USERNAME }}
           password: ${{ secrets.PAUSE_PASSWORD }}
