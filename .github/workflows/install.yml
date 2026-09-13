@@ -91,8 +91,13 @@ jobs:
         cpanm --notest Test2::V0
         cpanm --notest Test::Alien
         
-        # Test dependencies with FFI support (optional)
-        cpanm --notest FFI::Platypus
+        # FFI::Platypus is deliberately not installed on Windows. t/basic.t
+        # treats it as optional and skips its FFI subtest when it is absent, and
+        # it has failed three different ways across the Windows perls: Alien::FFI
+        # will not build on 5.36, 5.40 loads it with a mismatched handshake key
+        # (shogo82148/actions-setup-perl#2310), and 5.44 passes every assertion
+        # and then crashes during teardown. Installing it buys no coverage and
+        # costs a red build.
     
     - name: Build Module (Unix)
       if: runner.os != 'Windows'
